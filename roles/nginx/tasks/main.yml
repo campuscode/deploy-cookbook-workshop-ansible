@@ -1,0 +1,27 @@
+---
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: Remove default
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Add site config
+  template:
+    src: cookbook_nginx.j2
+    dest: /etc/nginx/sites-available/cookbook
+
+- name: Make site enabled
+  file:
+    src: /etc/nginx/sites-available/cookbook
+    path: /etc/nginx/sites-enabled/cookbook
+    state: link
+
+- name: Reload nginx config
+  systemd:
+    name: nginx
+    state: reloaded

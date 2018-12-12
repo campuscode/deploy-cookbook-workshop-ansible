@@ -1,0 +1,65 @@
+---
+- name: create app user
+  user:
+    name: cookbook
+    home: '{{ home_cookbook }}'
+    shell: /bin/bash
+    state: present
+
+- name: clone repository
+  git:
+    repo: https://github.com/campuscode/cookbook-workshop-ansible.git
+    dest: '{{ app_home_cookbook }}'
+
+- name: define cookbook as owner
+  file:
+    path: '{{ app_home_cookbook }}'
+    owner: cookbook
+    group: cookbook
+    recurse: yes
+
+- name: install gems
+  gem:
+    name: bundler
+    state: present
+    user_install: no
+    include_doc: no
+
+- name: copy systemd config for cookbook
+  copy:
+    src: cookbook.service
+    dest: /etc/systemd/system/
+
+- name: just force systemd
+  systemd:
+    daemon_reload: yes
+
+- name: install gems with bundler
+  bundler:
+    exclude_groups: development test
+    chdir: '{{ app_home_cookbook }}'
+    deployment_mode: yes
+  become: yes
+  become_user: cookbook
+
+- name: Copy default cookbook
+  template:
+    src: cookbook_env_vars
+    dest: '{{ item }}'
+    force: yes
+  with_items:
+    - /etc/default/cookbook
+    - '{{ home_cookbook }}/.profile'
+
+- name: Edit .profile to work with source command
+  replace:
+    regexp: '^'
+    replace: 'export '
+    path: '{{ home_cookbook }}/.profile'
+
+- name: precompile assets
+  shell: "/bin/bash -lc 'bundle exec rake assets:precompile'"
+  become: yes
+  become_user: cookbook
+  args:
+    chdir: '{{ app_home_cookbook }}'

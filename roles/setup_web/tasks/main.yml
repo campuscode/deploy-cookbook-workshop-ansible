@@ -1,0 +1,19 @@
+---
+- name: Add BrightBox repository
+  apt_repository:
+    repo: ppa:brightbox/ruby-ng
+    state: present
+
+- name: Install Dependencies
+  apt: name={{ packages }} state=present update_cache=true
+  vars:
+    packages:
+      - build-essential
+      - ruby2.5
+      - ruby2.5-dev
+      - libpq-dev
+      - libxml2-dev
+      - libxslt1-dev
+      - zlib1g-dev
+      - nodejs
+

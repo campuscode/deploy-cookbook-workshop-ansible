@@ -1,92 +1,21 @@
 ---
+- hosts: db
+  become: yes
+  vars_files:
+    - vars_files/db.yml
+  roles:
+    - postgres_cookbook
+
 - hosts: web
   become: yes
+  vars_files:
+    - vars_files/db.yml
   vars:
     - home_cookbook: /srv/cookbook
     - app_home_cookbook: /srv/cookbook/repo
-  tasks:
-    - name: Add BrightBox repository
-      apt_repository:
-        repo: ppa:brightbox/ruby-ng
-        state: present
-
-    - name: Install Dependencies
-      apt: name={{ packages }} state=present update_cache=true
-      vars:
-        packages:
-          - build-essential
-          - ruby2.5
-          - ruby2.5-dev
-          - libpq-dev
-          - libxml2-dev
-          - libxslt1-dev
-          - zlib1g-dev
-          - nodejs
-
-    - name: create app user
-      user:
-        name: cookbook
-        home: '{{ home_cookbook }}'
-        shell: /bin/bash
-        state: present
-
-    - name: clone repository
-      git:
-        repo: https://github.com/campuscode/cookbook-workshop-ansible.git
-        dest: '{{ app_home_cookbook }}'
-
-    - name: define cookbook as owner
-      file:
-        path: '{{ app_home_cookbook }}'
-        owner: cookbook
-        group: cookbook
-        recurse: yes
-
-    - name: install gems
-      gem:
-        name: bundler
-        state: present
-        user_install: no
-        include_doc: no
-
-    - name: copy systemd config for cookbook
-      copy:
-        src: cookbook.service
-        dest: /etc/systemd/system/
-
-    - name: just force systemd
-      systemd:
-        daemon_reload: yes
-
-    - name: install gems with bundler
-      bundler:
-        exclude_groups: development test
-        chdir: '{{ app_home_cookbook }}'
-        deployment_mode: yes
-      become: yes
-      become_user: cookbook
-
-    - name: Copy default cookbook
-      template:
-        src: cookbook_env_vars
-        dest: '{{ item }}'
-        force: yes
-      with_items:
-        - /etc/default/cookbook
-        - '{{ home_cookbook }}/.profile'
-
-    - name: Edit default codesaga to work with source command
-      replace:
-        regexp: '^'
-        replace: 'export '
-        path: '{{ home_cookbook }}/.profile'
-
-    - name: precompile assets
-      shell: "/bin/bash -lc 'bundle exec rake assets:precompile'"
-      become: yes
-      become_user: cookbook
-      args:
-        chdir: '{{ app_home_cookbook }}'
+  roles:
+    - setup_web
+    - install_app
 
 - hosts: web[0]
   become: yes
@@ -114,30 +43,5 @@
   vars:
     - cookbook_host: cookbook.com.br
     - cookbook_home_dir: /srv/cookbook/repo
-  tasks:
-    - name: Install nginx
-      apt:
-        name: nginx
-        state: present
-        update_cache: true
-
-    - name: Remove default
-      file:
-        path: /etc/nginx/sites-enabled/default
-        state: absent
-
-    - name: Add site config
-      template:
-        src: cookbook_nginx
-        dest: /etc/nginx/sites-available/cookbook
-
-    - name: Make site enabled
-      file:
-        src: /etc/nginx/sites-available/cookbook
-        path: /etc/nginx/sites-enabled/cookbook
-        state: link
-
-    - name: Reload nginx config
-      systemd:
-        name: nginx
-        state: reloaded
+  roles:
+    - nginx
