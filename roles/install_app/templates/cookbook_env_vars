@@ -1,9 +1,7 @@
 DB_USERNAME={{ cookbook_db_user }}
-DB_PASSWORD={{ cookbook_db_password }}
+DB_PASSWORD='{{ cookbook_db_password }}'
 DB_HOST={{ groups['db'][0] }}
 DB_NAME=cookbook
 RAILS_ENV=production
 SECRET_KEY_BASE=007e72239199f6e8f390b0c3330df03cabc80ca50bd0694ec9570000d83b46cf5fce5f12b9c3ab658dde57c8abd022549fd68d54ee3bda56d678789185362e81
 RAILS_SERVE_STATIC_FILES=true
-
-# vim: ft=cfg

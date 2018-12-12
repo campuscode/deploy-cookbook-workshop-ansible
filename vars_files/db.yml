@@ -1,3 +1,26 @@
 ---
 cookbook_db_user: cookbook
 cookbook_db_password: FAD#$$#fadfa3909@@rezpww
+
+postgresql_python_library:
+  - libpq-dev
+  - python3-dev
+  - python3-psycopg2
+postgresql_users:
+  - name: "{{ cookbook_db_user }}"
+    password: "{{ cookbook_db_password }}"
+postgresql_databases:
+  - name: cookbook
+postgresql_global_config_options:
+  - option: listen_addresses
+    value: '*'
+  - option: unix_socket_directories
+    value: '{{ postgresql_unix_socket_directories | join(",")  }}'
+postgresql_hba_entries:
+  - { type: local, database: all, user: postgres, auth_method: peer }
+  - { type: host, database: all, user: "{{ cookbook_db_user }}", address: '0.0.0.0/0', auth_method: md5 }
+  - { type: local, database: all, user: all, auth_method: md5 }
+  - { type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: md5 }
+  - { type: host, database: all, user: all, address: '::1/128', auth_method: md5 }
+
+# vi: set ft=yaml :

@@ -4,7 +4,7 @@
   vars_files:
     - vars_files/db.yml
   roles:
-    - postgres_cookbook
+    - geerlingguy.postgresql
 
 - hosts: web
   become: yes
