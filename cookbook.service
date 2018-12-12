@@ -1,0 +1,22 @@
+[Unit]
+Description=Cookbook web application
+After=network.target
+
+[Service]
+Type=simple
+TimeoutSec=120
+RestartSec=5
+Restart=always
+User=cookbook
+Group=cookbook
+PermissionsStartOnly=true
+
+EnvironmentFile=-/etc/default/cookbook
+WorkingDirectory=/srv/cookbook/repo
+
+ExecStart=/bin/bash -lc 'exec bundle exec puma -C config/puma.rb'
+
+[Install]
+WantedBy=multi-user.target
+
+# vi: set ft=systemd :
