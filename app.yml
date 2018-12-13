@@ -1,4 +1,15 @@
 ---
+- hosts: all
+  become: yes
+  roles:
+    - weareinteractive.ufw
+    - geerlingguy.security
+    - geerlingguy.ntp
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
 - hosts: db
   become: yes
   vars_files:
@@ -10,18 +21,12 @@
   become: yes
   vars_files:
     - vars_files/db.yml
-  vars:
-    - home_cookbook: /srv/cookbook
-    - app_home_cookbook: /srv/cookbook/repo
   roles:
     - setup_web
     - install_app
 
 - hosts: web[0]
   become: yes
-  vars:
-    - home_cookbook: /srv/cookbook
-    - app_home_cookbook: /srv/cookbook/repo
   tasks:
     - name: Run migrations
       shell: "/bin/bash -lc 'bundle exec rake db:migrate'"
@@ -40,8 +45,5 @@
 
 - hosts: nginx
   become: yes
-  vars:
-    - cookbook_host: cookbook.com.br
-    - cookbook_home_dir: /srv/cookbook/repo
   roles:
     - nginx

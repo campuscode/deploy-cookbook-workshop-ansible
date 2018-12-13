@@ -1,0 +1,4 @@
+---
+ufw_rules:
+  - { port: 22, rule: allow }
+  - { port: 5432, rule: allow  }

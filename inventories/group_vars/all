@@ -1,0 +1,8 @@
+---
+ufw_rules:
+  - { port: 22, rule: allow  }
+ntp_timezone: America/Sao_Paulo
+cookbook_host: cookbook.com.br
+cookbook_home_dir: /srv/cookbook/repo
+home_cookbook: /srv/cookbook
+app_home_cookbook: /srv/cookbook/repo

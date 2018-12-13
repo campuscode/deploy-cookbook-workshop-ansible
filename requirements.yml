@@ -1,3 +1,12 @@
 ---
 - src: geerlingguy.postgresql
   version: master
+
+- src: geerlingguy.security
+  version: 1.8.0
+
+- src: geerlingguy.ntp
+  version: 1.6.2
+
+- src: weareinteractive.ufw
+  version: 1.9.0
